@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace MessageBoardApi.Controllers;
 
-[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class MessagesController : ControllerBase
@@ -65,6 +64,7 @@ public class MessagesController : ControllerBase
 
   // POST: api/messages
   [HttpPost]
+  [Authorize]
   public async Task<ActionResult<Message>> Post(Message message)
   {
     _db.Messages.Add(message); // our Messages table only has fields for Id's, the User and Group objects are Model properties that define the relationship in our program, but not in our database
@@ -74,6 +74,7 @@ public class MessagesController : ControllerBase
 
   // PUT: api/messages/{id}?
   [HttpPut("{id}")] // our route
+  [Authorize]
   public async Task<IActionResult> Put(int id, Message message, string user_name) //api/messages/1?user_name=R
   {
 
@@ -115,6 +116,7 @@ public class MessagesController : ControllerBase
 
   // DELETE: api/messages/{id}
   [HttpDelete("{id}")]
+  [Authorize]
   public async Task<IActionResult> DeleteMessage(int id)
   {
     Message message = await _db.Messages.FindAsync(id);
