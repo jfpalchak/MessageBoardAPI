@@ -45,5 +45,12 @@ public class GroupsController : ControllerBase
   }
 
   // GET: api/groups/{id}/messages
-  
+  [HttpGet("{id}/messages")]
+  public async Task<ActionResult<IEnumerable<Message>>> GetMessages(int id)
+  {
+    IQueryable<Message> query = _db.Messages.Where(m => m.GroupId == id).AsQueryable();
+
+    return await query.ToListAsync();
+  }
+
 }

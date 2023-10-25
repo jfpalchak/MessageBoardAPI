@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MessageBoardApi.Models;
+using Microsoft.AspNetCore.Authorization;
 // using MessageBoardApi.Migrations;
 
 namespace MessageBoardApi.Controllers;
 
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class MessagesController : ControllerBase
@@ -108,7 +110,7 @@ public class MessagesController : ControllerBase
 
   private bool IsAuthor(int id, string user_name)
   { // does ANY message exist with BOTH this ID ~AND~ this User?
-    return _db.Messages.Any(e => e.MessageId == id && e.User.Name == user_name);
+    return _db.Messages.Any(e => e.MessageId == id && e.User.UserName == user_name);
   }
 
   // DELETE: api/messages/{id}

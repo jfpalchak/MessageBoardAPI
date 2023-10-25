@@ -10,7 +10,7 @@ namespace MessageBoardApi.Models
     // [JsonIgnore]
     public List<Message> Messages { get; set; } // One to Many
 
-    [JsonIgnore]
-    public List<GroupUser> JoinEntities { get; } // collection navigation property - Many to Many.
+    // [JsonIgnore]
+    // public List<GroupUser> JoinEntities { get; } // collection navigation property - Many to Many.
   }
 }
