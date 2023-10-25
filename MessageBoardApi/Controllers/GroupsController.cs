@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MessageBoardApi.Models;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 // using MessageBoardApi.Migrations;
 
 namespace MessageBoardApi.Controllers;
@@ -11,10 +14,12 @@ namespace MessageBoardApi.Controllers;
 public class GroupsController : ControllerBase
 {
   private readonly MessageBoardApiContext _db;
+  private readonly UserManager<ApplicationUser> _userManager;
 
-  public GroupsController(MessageBoardApiContext db)
+  public GroupsController(MessageBoardApiContext db, UserManager<ApplicationUser> userManager)
   {
     _db = db;
+    _userManager = userManager;
   }
 
   // GET: api/groups
@@ -53,4 +58,31 @@ public class GroupsController : ControllerBase
     return await query.ToListAsync();
   }
 
+  // GET: api/groups/{id}/messages/{id}
+  [HttpGet("{id}/messages/{messageId}")]
+  public async Task<ActionResult<IEnumerable<Message>>> GetMessage(int id, int messageId)
+  {
+    IQueryable<Message> query = _db.Messages
+                                            .Where(m => m.GroupId == id)
+                                            .Where(m => m.MessageId == messageId)
+                                            .AsQueryable();
+
+    return await query.ToListAsync();
+  }
+
+
+  // POST: api/groups/{id}/messages
+  [HttpPost("{id}/messages")]
+  [Authorize]
+  public async Task<ActionResult<Message>> PostMessage(int id, Message message)
+  {
+    message.GroupId = id;
+    // message.UserId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+    message.UserId = User.Claims.Where(u => u.Type == "userId").FirstOrDefault().Value;
+    message.Date = DateTime.Now;
+    _db.Messages.Add(message);
+    await _db.SaveChangesAsync();
+    return CreatedAtAction(nameof(GetMessage), new { id = id, messageId = message.MessageId }, message);
+  }
 }
+
