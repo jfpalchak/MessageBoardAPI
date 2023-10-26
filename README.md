@@ -486,8 +486,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ### 🌟 Resources Used
 
-[Guidance on Adding Authorization to API with Identity and JWT](https://github.com/CalvinPVIII/asp.net-webapi-auth-guide), by [Calvin Will](https://github.com/CalvinPVIII)
-[Guidance on Pagination](https://codewithmukesh.com/blog/pagination-in-aspnet-core-webapi/), by [CodeWithMukesh](https://codewithmukesh.com)
+* [Adding Authorization to API with Identity and JWT](https://github.com/CalvinPVIII/asp.net-webapi-auth-guide), by [Calvin Will](https://github.com/CalvinPVIII)
+* [Pagination](https://codewithmukesh.com/blog/pagination-in-aspnet-core-webapi/), by [CodeWithMukesh](https://codewithmukesh.com)
+  
 ------------------------------
 
 <center><a href="#">Return to Top</a></center>
