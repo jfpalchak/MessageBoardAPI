@@ -1,4 +1,5 @@
 using MessageBoardApi.Models;
+using MessageBoardApi.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -24,6 +25,16 @@ builder.Services.AddDbContext<MessageBoardApiContext>(
                     )
                   )
                 );
+
+// Configuring our UriService to get the Base URL
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddSingleton<IUriService>(options =>
+{
+  var accessor = options.GetRequiredService<IHttpContextAccessor>();
+  var request = accessor.HttpContext.Request;
+  var uri = string.Concat(request.Scheme, "://", request.Host.ToUriComponent());
+  return new UriService(uri);
+});
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
   .AddEntityFrameworkStores<MessageBoardApiContext>()

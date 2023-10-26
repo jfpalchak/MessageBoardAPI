@@ -39,6 +39,15 @@ public class MessagesController : ControllerBase
       query = query.Where(entry => entry.Date <= DateTime.Parse(dateTo));
     }
 
+    // ########################
+    // # BASIC PAGINATION:
+    // # search params: 
+    // # int page = 1, int pageSize = 2
+    // # declare our skip argument:
+    // # int skip = (page - 1) * pageSize;
+    // # add Skip and Take to query:
+    // # query.Skip(skip).Take(pageSize);
+
     return await query
                       // .Include(message => message.Group) // we could still "Include" this, and JsonIgnore will still ignore the data
                       .Include(message => message.User)

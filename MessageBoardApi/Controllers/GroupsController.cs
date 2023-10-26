@@ -4,7 +4,10 @@ using MessageBoardApi.Models;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
-// using MessageBoardApi.Migrations;
+using MessageBoardApi.Wrappers;
+using MessageBoardApi.Filters;
+using MessageBoardApi.Services;
+using MessageBoardApi.Helpers;
 
 namespace MessageBoardApi.Controllers;
 
@@ -15,11 +18,13 @@ public class GroupsController : ControllerBase
 {
   private readonly MessageBoardApiContext _db;
   private readonly UserManager<ApplicationUser> _userManager;
+  private readonly IUriService _uriService;
 
-  public GroupsController(MessageBoardApiContext db, UserManager<ApplicationUser> userManager)
+  public GroupsController(MessageBoardApiContext db, UserManager<ApplicationUser> userManager, IUriService uriService)
   {
     _db = db;
     _userManager = userManager;
+    _uriService = uriService;
   }
 
   // GET: api/groups
@@ -50,26 +55,39 @@ public class GroupsController : ControllerBase
   }
 
   // GET: api/groups/{id}/messages
+  // Now, with PAGINATION!
   [HttpGet("{id}/messages")]
-  public async Task<ActionResult<IEnumerable<Message>>> GetMessages(int id)
+  public async Task<IActionResult> GetMessages([FromQuery] PaginationFilter filter, int id)
   {
-    IQueryable<Message> query = _db.Messages.Where(m => m.GroupId == id).AsQueryable();
+    // get the route of the current controller action method 
+    // It is this string that we are going to pass to our helper class method.
+    string route = Request.Path.Value;
+    PaginationFilter pageFilter = new PaginationFilter(filter.PageNumber, filter.PageSize);
 
-    return await query.ToListAsync();
+    List<Message> pagedMessages = await _db.Messages
+                                                  .Where(m => m.GroupId == id)
+                                                  .Skip((pageFilter.PageNumber - 1) * pageFilter.PageSize)
+                                                  .Take(pageFilter.PageSize)
+                                                  .ToListAsync();
+
+    int totalRecords = await _db.Messages.Where(m => m.GroupId == id).CountAsync();
+    // Call the Helper class with required params, create our paginated response.
+    PagedResponse<List<Message>> pagedResponse = PaginationHelper.CreatePagedResponse<Message>(pagedMessages, pageFilter, totalRecords, _uriService, route);
+
+    return Ok(pagedResponse);
   }
 
   // GET: api/groups/{id}/messages/{id}
   [HttpGet("{id}/messages/{messageId}")]
-  public async Task<ActionResult<IEnumerable<Message>>> GetMessage(int id, int messageId)
+  public async Task<IActionResult> GetMessage(int id, int messageId)
   {
-    IQueryable<Message> query = _db.Messages
-                                            .Where(m => m.GroupId == id)
-                                            .Where(m => m.MessageId == messageId)
-                                            .AsQueryable();
+    Message message = await _db.Messages
+                                        // .Include(message => message.Group)
+                                        // .Include(message => message.User)
+                                        .FirstOrDefaultAsync(message => message.MessageId == id && message.GroupId == id);
 
-    return await query.ToListAsync();
+    return Ok(new Response<Message>(message));
   }
-
 
   // POST: api/groups/{id}/messages
   [HttpPost("{id}/messages")]
@@ -78,6 +96,7 @@ public class GroupsController : ControllerBase
   {
     message.GroupId = id;
     // message.UserId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+    // get the user claim from the Token
     message.UserId = User.Claims.Where(u => u.Type == "userId").FirstOrDefault().Value;
     message.Date = DateTime.Now;
     _db.Messages.Add(message);
