@@ -17,7 +17,8 @@ namespace MessageBoardApi.Models
 
     [JsonIgnore]
     public Group Group { get; set; } // navigation property - One to Many
-    
+
+    [JsonIgnore]
     public ApplicationUser User { get; set; } // navigation property - One to Many
 
   }
