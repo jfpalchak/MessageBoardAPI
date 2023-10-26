@@ -313,7 +313,7 @@ DELETE /api/{component}/{id}
 
 #### Example Query
 ```
-https://localhost:5000/api/boards/3
+https://localhost:5000/api/groups/3
 ```
 
 #### Sample JSON Response
